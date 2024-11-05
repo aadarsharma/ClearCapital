@@ -19,7 +19,7 @@ export default function ProjectionChart({ results }) {
         }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={results}>
+          <LineChart data={results} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
             <XAxis 
               dataKey="year" 
               stroke="hsl(var(--muted-foreground))"
@@ -28,6 +28,8 @@ export default function ProjectionChart({ results }) {
               axisLine={false}
             />
             <YAxis
+              domain={['auto', 'auto']}
+              padding={{ top: 20, bottom: 20 }}
               stroke="hsl(var(--muted-foreground))"
               fontSize={12}
               tickLine={false}
@@ -35,8 +37,20 @@ export default function ProjectionChart({ results }) {
               tickFormatter={(value) => `₹${value.toLocaleString()}`}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <Line type="monotone" dataKey="realEstateValue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="mutualFundValue" stroke="hsl(var(--secondary))" strokeWidth={2} dot={false} />
+            <Line 
+              type="monotone" 
+              dataKey="realEstateValue" 
+              stroke="hsl(var(--primary))" 
+              strokeWidth={2} 
+              dot={false} 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="mutualFundValue" 
+              stroke="hsl(var(--secondary))" 
+              strokeWidth={2} 
+              dot={false} 
+            />
           </LineChart>
         </ResponsiveContainer>
       </ChartContainer>

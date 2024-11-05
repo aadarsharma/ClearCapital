@@ -13,12 +13,24 @@ export default function FinancialForm({ onSubmit }) {
   const [withdrawal, setWithdrawal] = useState('')
   const [years, setYears] = useState('')
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-
-    const appreciationArray = appreciationRates.split(',').map(rate => parseFloat(rate.trim()) || 0)
-    const inflationArray = inflationRates.split(',').map(rate => parseFloat(rate.trim()) || 0)
-
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    // Validate principal as a positive number
+    if (!principal || parseFloat(principal) <= 0) {
+      alert("Please enter a valid principal amount greater than zero.");
+      return;
+    }
+  
+    // Parse appreciation and inflation rates with defaults if empty
+    const appreciationArray = appreciationRates
+      ? appreciationRates.split(',').map((rate) => parseFloat(rate.trim()) || 0)
+      : Array.from({ length: parseInt(years) || 1 }, () => 2); // Default 2% appreciation
+  
+    const inflationArray = inflationRates
+      ? inflationRates.split(',').map((rate) => parseFloat(rate.trim()) || 0)
+      : Array.from({ length: parseInt(years) || 1 }, () => 7); // Default 7% inflation
+  
     onSubmit({
       principal: parseFloat(principal) || 0,
       appreciationRates: appreciationArray,
@@ -26,8 +38,10 @@ export default function FinancialForm({ onSubmit }) {
       inflationRates: inflationArray,
       withdrawal: parseFloat(withdrawal) || 0,
       years: parseInt(years) || 0,
-    })
-  }
+    });
+  };
+  
+  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
