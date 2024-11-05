@@ -5,32 +5,47 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function FinancialForm({ onSubmit }) {
+interface FinancialFormProps {
+  onSubmit: (data: {
+    principal: number
+    appreciationRates: number[]
+    cagr: number
+    inflationRates: number[]
+    withdrawal: number
+    years: number
+    monthlyContribution: number
+    stepUpRate: number
+  }) => void
+}
+
+export default function FinancialForm({ onSubmit }: FinancialFormProps) {
   const [principal, setPrincipal] = useState('')
   const [appreciationRates, setAppreciationRates] = useState('')
   const [cagr, setCAGR] = useState('')
   const [inflationRates, setInflationRates] = useState('')
   const [withdrawal, setWithdrawal] = useState('')
   const [years, setYears] = useState('')
+  const [monthlyContribution, setMonthlyContribution] = useState('')
+  const [stepUpRate, setStepUpRate] = useState('')
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  
+    e.preventDefault()
+
     // Validate principal as a positive number
     if (!principal || parseFloat(principal) <= 0) {
-      alert("Please enter a valid principal amount greater than zero.");
-      return;
+      alert("Please enter a valid principal amount greater than zero.")
+      return
     }
-  
+
     // Parse appreciation and inflation rates with defaults if empty
     const appreciationArray = appreciationRates
       ? appreciationRates.split(',').map((rate) => parseFloat(rate.trim()) || 0)
-      : Array.from({ length: parseInt(years) || 1 }, () => 2); // Default 2% appreciation
-  
+      : Array.from({ length: parseInt(years) || 1 }, () => 2) // Default 2% appreciation
+
     const inflationArray = inflationRates
       ? inflationRates.split(',').map((rate) => parseFloat(rate.trim()) || 0)
-      : Array.from({ length: parseInt(years) || 1 }, () => 7); // Default 7% inflation
-  
+      : Array.from({ length: parseInt(years) || 1 }, () => 7) // Default 7% inflation
+
     onSubmit({
       principal: parseFloat(principal) || 0,
       appreciationRates: appreciationArray,
@@ -38,10 +53,10 @@ export default function FinancialForm({ onSubmit }) {
       inflationRates: inflationArray,
       withdrawal: parseFloat(withdrawal) || 0,
       years: parseInt(years) || 0,
-    });
-  };
-  
-  
+      monthlyContribution: parseFloat(monthlyContribution) || 0,
+      stepUpRate: parseFloat(stepUpRate) || 0,
+    })
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -110,6 +125,28 @@ export default function FinancialForm({ onSubmit }) {
             onChange={(e) => setYears(e.target.value)}
             className="w-full"
             placeholder="Enter investment duration"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="monthlyContribution" className="text-sm font-medium">Monthly Contribution (₹)</Label>
+          <Input
+            id="monthlyContribution"
+            type="number"
+            value={monthlyContribution}
+            onChange={(e) => setMonthlyContribution(e.target.value)}
+            className="w-full"
+            placeholder="Enter monthly contribution"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="stepUpRate" className="text-sm font-medium">Step-Up Rate (%)</Label>
+          <Input
+            id="stepUpRate"
+            type="number"
+            value={stepUpRate}
+            onChange={(e) => setStepUpRate(e.target.value)}
+            className="w-full"
+            placeholder="Enter annual step-up rate"
           />
         </div>
       </div>

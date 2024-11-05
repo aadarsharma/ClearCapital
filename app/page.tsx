@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -7,13 +6,25 @@ import FinancialForm from '../components/FinancialForm'
 import ResultsTable from '../components/ResultsTable'
 import ProjectionChart from '../components/ProjectionChart'
 
-export default function Home() {
-  const [results, setResults] = useState([])
+interface ProjectionData {
+  principal: number
+  appreciationRates: number[]
+  cagr: number
+  inflationRates: number[]
+  withdrawal: number
+  years: number
+  monthlyContribution: number
+  stepUpRate: number
+}
 
-  const calculateProjections = ({ principal, appreciationRates, cagr, inflationRates, withdrawal, years }) => {
+export default function Home() {
+  const [results, setResults] = useState<Array<any>>([])
+
+  const calculateProjections = ({ principal, appreciationRates, cagr, inflationRates, withdrawal, years, monthlyContribution, stepUpRate }: ProjectionData) => {
     let data = []
     let realEstateValue = principal
     let mutualFundValue = principal
+    let annualContribution = monthlyContribution * 12
 
     for (let year = 0; year <= years; year++) {
       const appreciationRate = appreciationRates[year] !== undefined 
@@ -24,11 +35,17 @@ export default function Home() {
         ? inflationRates[year] 
         : inflationRates[inflationRates.length - 1]
 
-      realEstateValue *= (1 + (appreciationRate / 100))
+      // Increase contribution by step-up rate each year
+      if (year > 0) {
+        annualContribution *= (1 + (stepUpRate / 100))
+      }
+
+      // Update values for real estate and mutual fund with monthly contributions and annual returns
+      realEstateValue = (realEstateValue * (1 + (appreciationRate / 100))) + annualContribution
       const realEstateYield = realEstateValue * 0.04
       const inflationAdjustedRealEstateYield = realEstateYield / Math.pow(1 + (inflationRate / 100), year)
 
-      mutualFundValue = mutualFundValue * (1 + (cagr / 100)) - (withdrawal * Math.pow(1 + (inflationRate / 100), year))
+      mutualFundValue = (mutualFundValue * (1 + (cagr / 100))) + annualContribution - (withdrawal * Math.pow(1 + (inflationRate / 100), year))
       mutualFundValue = mutualFundValue < 0 ? 0 : mutualFundValue
 
       const inflationAdjustedMutualFundValue = mutualFundValue / Math.pow(1 + (inflationRate / 100), year)
