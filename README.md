@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ClearCapital
+
+ClearCapital is a finance visualization web app built with **Next.js** that allows users to compare real estate and mutual fund investment projections over time. This tool provides visual insights with charts and tables to help track financial growth, taking into account various factors such as inflation rates, appreciation rates, and withdrawal amounts.
+
+## Features
+
+- **Dynamic Financial Projections**: Calculate and visualize financial projections for real estate and mutual funds.
+- **Customizable Inputs**: Input different annual appreciation rates, inflation rates, and withdrawal amounts for a personalized analysis.
+- **Interactive Charts and Tables**: View results in a line chart or table format for a clearer comparison of investment values.
+- **Responsive Design**: Optimized for desktop and mobile devices.
+
+## Technologies Used
+
+- **Next.js**: React framework for server-rendered applications.
+- **Recharts**: For data visualization in charts.
+- **Tailwind CSS**: For responsive and modern styling.
 
 ## Getting Started
 
-First, run the development server:
+Follow these instructions to set up and run ClearCapital locally.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Prerequisites
+
+- **Node.js** (v14 or above)
+- **npm** or **yarn** (for managing dependencies)
+
+### Installation
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/aadarsharma/ClearCapital.git
+   cd ClearCapital
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+   or
+   ```bash
+   yarn install
+   ```
+
+3. **Run the Development Server**
+   ```bash
+   npm run dev
+   ```
+   or
+   ```bash
+   yarn dev
+   ```
+
+4. **Visit the Application**
+   Open your browser and navigate to `http://localhost:3000` to view ClearCapital.
+
+## Usage
+
+1. **Input Investment Details**: Enter your initial investment, appreciation rates, CAGR for mutual funds, inflation rates, and annual withdrawals.
+2. **Calculate**: Click "Calculate" to generate projections.
+3. **View Results**: Switch between "Chart" and "Table" views to analyze the results visually or numerically.
+
+## Project Structure
+
+Here's a brief overview of the project's structure:
+
+```plaintext
+clearcapital/
+├── app/
+│   ├── components/
+│   │   ├── FinancialForm.jsx          # Form for inputting financial data
+│   │   ├── ResultsTable.jsx           # Displays results in a table
+│   │   └── ProjectionChart.jsx        # Line chart visualization of projections
+│   ├── layout.js                      # Layout and head configuration
+│   └── page.jsx                       # Main page of the application
+├── public/                            # Public assets
+│   └── favicon.ico                    # Favicon for the application
+├── .gitignore                         # Files and directories to ignore in Git
+├── package.json                       # Project dependencies and scripts
+└── README.md                          # Project documentation
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Contributing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Contributions are welcome! To contribute:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Open a pull request.
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
+This project is licensed under the MIT License.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contact
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For questions or suggestions, please reach out at [adarsharma56763@gmail.com](mailto:adarsharma56763@gmail.com).
