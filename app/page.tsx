@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,46 +18,67 @@ interface ProjectionData {
   stepUpRate: number
 }
 
+interface YearlyResult {
+  year: number
+  principal: number
+  realEstateValueWithAppreciation: number
+  mutualFundValueAfterCAGR: number
+  inflationAdjustedAnnualWithdrawal: number
+  mutualFundValueAfterWithdrawal: number
+  inflationAdjustedMutualFundValueAfterWithdrawal: number
+}
+
 export default function Home() {
-  const [results, setResults] = useState<Array<any>>([])
+  const [results, setResults] = useState<YearlyResult[]>([])
 
   const calculateProjections = ({ principal, appreciationRates, cagr, inflationRates, withdrawal, years, monthlyContribution, stepUpRate }: ProjectionData) => {
-    let data = []
+    const data: YearlyResult[] = []
     let realEstateValue = principal
     let mutualFundValue = principal
     let annualContribution = monthlyContribution * 12
 
-    for (let year = 0; year <= years; year++) {
-      const appreciationRate = appreciationRates[year] !== undefined 
-        ? appreciationRates[year] 
-        : appreciationRates[appreciationRates.length - 1]
-        
-      const inflationRate = inflationRates[year] !== undefined 
-        ? inflationRates[year] 
-        : inflationRates[inflationRates.length - 1]
+    // Start with Year 0 initial values
+    data.push({
+      year: 0,
+      principal,
+      realEstateValueWithAppreciation: principal,
+      mutualFundValueAfterCAGR: principal,
+      inflationAdjustedAnnualWithdrawal: 0,
+      mutualFundValueAfterWithdrawal: principal,
+      inflationAdjustedMutualFundValueAfterWithdrawal: principal,
+    })
 
-      // Increase contribution by step-up rate each year
-      if (year > 0) {
-        annualContribution *= (1 + (stepUpRate / 100))
+    // Calculations for each subsequent year
+    for (let year = 1; year <= years; year++) {
+      const appreciationRate = appreciationRates[year - 1] ?? appreciationRates[appreciationRates.length - 1]
+      const inflationRate = inflationRates[year - 1] ?? inflationRates[inflationRates.length - 1]
+
+      // Increase annual contribution by step-up rate for each year after Year 1
+      if (year > 1) {
+        annualContribution *= (1 + stepUpRate / 100)
       }
 
-      // Update values for real estate and mutual fund with monthly contributions and annual returns
-      realEstateValue = (realEstateValue * (1 + (appreciationRate / 100))) + annualContribution
-      const realEstateYield = realEstateValue * 0.04
-      const inflationAdjustedRealEstateYield = realEstateYield / Math.pow(1 + (inflationRate / 100), year)
+      // Real Estate calculations
+      realEstateValue = (realEstateValue * (1 + appreciationRate / 100)) + annualContribution
 
-      mutualFundValue = (mutualFundValue * (1 + (cagr / 100))) + annualContribution - (withdrawal * Math.pow(1 + (inflationRate / 100), year))
-      mutualFundValue = mutualFundValue < 0 ? 0 : mutualFundValue
-
-      const inflationAdjustedMutualFundValue = mutualFundValue / Math.pow(1 + (inflationRate / 100), year)
+      // Mutual Fund calculations
+      mutualFundValue = (mutualFundValue * (1 + cagr / 100)) + annualContribution
+      const inflationAdjustedAnnualWithdrawal = withdrawal * Math.pow(1 + inflationRate / 100, year)
+      const mutualFundValueAfterWithdrawal = Math.max(0, mutualFundValue - inflationAdjustedAnnualWithdrawal)
+      const inflationAdjustedMutualFundValueAfterWithdrawal = mutualFundValueAfterWithdrawal / Math.pow(1 + inflationRate / 100, year)
 
       data.push({
         year,
-        realEstateValue: realEstateValue < 0 ? 0 : realEstateValue,
-        inflationAdjustedRealEstateYield,
-        mutualFundValue,
-        inflationAdjustedMutualFundValue,
+        principal,
+        realEstateValueWithAppreciation: realEstateValue,
+        mutualFundValueAfterCAGR: mutualFundValue,
+        inflationAdjustedAnnualWithdrawal,
+        mutualFundValueAfterWithdrawal,
+        inflationAdjustedMutualFundValueAfterWithdrawal,
       })
+
+      // Update mutual fund value for the next year
+      mutualFundValue = mutualFundValueAfterWithdrawal
     }
 
     setResults(data)
