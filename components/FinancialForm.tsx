@@ -1,53 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface FinancialFormProps {
   onSubmit: (data: {
-    principal: number
-    appreciationRates: number[]
-    cagr: number
-    inflationRates: number[]
-    withdrawal: number
-    years: number
-    monthlyContribution: number
-    stepUpRate: number
-  }) => void
+    principal: number;
+    appreciationRates: number[];
+    cagr: number;
+    inflationRates: number[];
+    withdrawal: number;
+    years: number;
+    monthlyContribution: number;
+    stepUpRate: number;
+  }) => void;
 }
 
 export default function FinancialForm({ onSubmit }: FinancialFormProps) {
-  const [principal, setPrincipal] = useState('')
-  const [appreciationRates, setAppreciationRates] = useState('')
-  const [cagr, setCAGR] = useState('')
-  const [inflationRates, setInflationRates] = useState('')
-  const [withdrawal, setWithdrawal] = useState('')
-  const [years, setYears] = useState('')
-  const [monthlyContribution, setMonthlyContribution] = useState('')
-  const [stepUpRate, setStepUpRate] = useState('')
+  const [principal, setPrincipal] = useState('');
+  const [appreciationRates, setAppreciationRates] = useState('');
+  const [cagr, setCAGR] = useState('');
+  const [inflationRates, setInflationRates] = useState('');
+  const [withdrawal, setWithdrawal] = useState('');
+  const [years, setYears] = useState('');
+  const [monthlyContribution, setMonthlyContribution] = useState('');
+  const [stepUpRate, setStepUpRate] = useState('');
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    // Validate principal as a positive number
-    if (!principal || parseFloat(principal) <= 0) {
-      alert("Please enter a valid principal amount greater than zero.")
-      return
-    }
+    e.preventDefault();
 
     // Parse appreciation and inflation rates with defaults if empty
     const appreciationArray = appreciationRates
       ? appreciationRates.split(',').map((rate) => parseFloat(rate.trim()) || 0)
-      : Array.from({ length: parseInt(years) || 1 }, () => 2) // Default 2% appreciation
+      : Array.from({ length: parseInt(years) || 1 }, () => 0); // Default 0% appreciation
 
     const inflationArray = inflationRates
       ? inflationRates.split(',').map((rate) => parseFloat(rate.trim()) || 0)
-      : Array.from({ length: parseInt(years) || 1 }, () => 7) // Default 7% inflation
+      : Array.from({ length: parseInt(years) || 1 }, () => 0); // Default 0% inflation
 
     onSubmit({
-      principal: parseFloat(principal) || 0,
+      principal: parseFloat(principal) || 0, // Allow principal to be zero
       appreciationRates: appreciationArray,
       cagr: parseFloat(cagr) || 0,
       inflationRates: inflationArray,
@@ -55,8 +49,8 @@ export default function FinancialForm({ onSubmit }: FinancialFormProps) {
       years: parseInt(years) || 0,
       monthlyContribution: parseFloat(monthlyContribution) || 0,
       stepUpRate: parseFloat(stepUpRate) || 0,
-    })
-  }
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -69,7 +63,7 @@ export default function FinancialForm({ onSubmit }: FinancialFormProps) {
             value={principal}
             onChange={(e) => setPrincipal(e.target.value)}
             className="w-full"
-            placeholder="Enter principal amount"
+            placeholder="Enter principal amount (can be 0)"
           />
         </div>
         <div className="space-y-2">
@@ -146,11 +140,11 @@ export default function FinancialForm({ onSubmit }: FinancialFormProps) {
             value={stepUpRate}
             onChange={(e) => setStepUpRate(e.target.value)}
             className="w-full"
-            placeholder="Enter annual step-up rate"
+            placeholder="Enter annual step-up rate (default 0%)"
           />
         </div>
       </div>
       <Button type="submit" className="w-full">Calculate</Button>
     </form>
-  )
+  );
 }

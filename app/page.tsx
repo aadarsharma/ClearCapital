@@ -20,11 +20,12 @@ interface YearlyResult {
 export default function Home() {
   const [results, setResults] = useState<YearlyResult[]>([])
 
-  const calculateProjections = ({ principal, appreciationRates, cagr, inflationRates, withdrawal, years, monthlyContribution, stepUpRate }) => {
+  const calculateProjections = ({ principal = 0, appreciationRates = [], cagr = 0, inflationRates = [], withdrawal = 0, years, monthlyContribution = 0, stepUpRate = 0 }) => {
     const data = [];
     let realEstateValue = principal;
     let mutualFundValue = principal;
-    let annualContribution = monthlyContribution * 12;
+    let annualStepUpMultiplier = 1 + stepUpRate / 100; // Factor to adjust monthly contribution annually
+    let monthlyCAGR = Math.pow(1 + cagr / 100, 1 / 12) - 1; // Convert CAGR to monthly rate for compounding
   
     // Year 0 initial values
     data.push({
@@ -37,20 +38,27 @@ export default function Home() {
       inflationAdjustedMutualFundValueAfterWithdrawal: principal,
     });
   
-    // Projections for each year
+    // Loop over each year to calculate projections
     for (let year = 1; year <= years; year++) {
-      const appreciationRate = appreciationRates[year - 1] ?? appreciationRates[appreciationRates.length - 1];
-      const inflationRate = inflationRates[year - 1] ?? inflationRates[inflationRates.length - 1];
+      const appreciationRate = appreciationRates[year - 1] ?? 0; // Default to 0% if appreciation rate not provided
+      const inflationRate = inflationRates[year - 1] ?? 0; // Default to 0% if inflation rate not provided
+      let totalYearlyContribution = 0;
   
-      // Step-up annual contribution each year after Year 1
+      // Apply the step-up rate to monthly contribution at the beginning of each year (if year > 1)
       if (year > 1) {
-        annualContribution *= (1 + stepUpRate / 100);
+        monthlyContribution *= annualStepUpMultiplier;
       }
   
-      // Update real estate and mutual fund values with appreciation and contributions
-      realEstateValue = (realEstateValue * (1 + appreciationRate / 100)) + annualContribution;
-      mutualFundValue = (mutualFundValue * (1 + cagr / 100)) + annualContribution;
+      // Monthly compounding for mutual fund and accumulating total yearly contribution
+      for (let month = 1; month <= 12; month++) {
+        mutualFundValue = (mutualFundValue * (1 + monthlyCAGR)) + monthlyContribution;
+        totalYearlyContribution += monthlyContribution;
+      }
   
+      // End-of-year update for real estate: add total contributions and apply annual appreciation
+      realEstateValue = (realEstateValue + totalYearlyContribution) * (1 + appreciationRate / 100);
+  
+      // Adjust the annual withdrawal for inflation
       const inflationAdjustedAnnualWithdrawal = withdrawal * Math.pow(1 + inflationRate / 100, year);
       const mutualFundValueAfterWithdrawal = Math.max(0, mutualFundValue - inflationAdjustedAnnualWithdrawal);
       const inflationAdjustedMutualFundValueAfterWithdrawal = mutualFundValueAfterWithdrawal / Math.pow(1 + inflationRate / 100, year);
@@ -65,11 +73,14 @@ export default function Home() {
         inflationAdjustedMutualFundValueAfterWithdrawal,
       });
   
-      mutualFundValue = mutualFundValueAfterWithdrawal;  // Update for next year's calculation
+      // Update mutual fund value for the next year’s starting value
+      mutualFundValue = mutualFundValueAfterWithdrawal;
     }
   
     setResults(data);
-  };  
+  };
+  
+  
 
   return (
     <div className="p-6 min-h-screen">
