@@ -20,45 +20,34 @@ interface YearlyResult {
 export default function Home() {
   const [results, setResults] = useState<YearlyResult[]>([])
 
-  const calculateProjections = ({ principal = 0, appreciationRates = [], cagr = 0, inflationRates = [], withdrawal = 0, years, monthlyContribution = 0, stepUpRate = 0 }) => {
+  const calculateProjections = ({ principal, appreciationRates, cagr, inflationRates, withdrawal, years, monthlyContribution, stepUpRate }) => {
     const data = [];
     let realEstateValue = principal;
     let mutualFundValue = principal;
-    let totalInvestedAmount = principal; // Track cumulative invested amount
-    let annualStepUpMultiplier = 1 + stepUpRate / 100; // Factor to adjust monthly contribution annually
-    let monthlyCAGR = Math.pow(1 + cagr / 100, 1 / 12) - 1; // Convert CAGR to monthly rate for compounding
+    let annualContribution = monthlyContribution * 12;
   
-    // Loop over each year to calculate projections, extending one year past the specified years
-    for (let year = 1; year <= years + 1; year++) {
-      const appreciationRate = appreciationRates[year - 1] ?? 0; // Default to 0% if appreciation rate not provided
-      const inflationRate = inflationRates[year - 1] ?? 0; // Default to 0% if inflation rate not provided
-      let totalYearlyContribution = 0;
+    // Projections for each year starting from Year 1, but pushed as Year 0
+    for (let year = 1; year <= years + 1; year++) { // loop until `years + 1` for shifted values
+      const appreciationRate = appreciationRates[year - 1] ?? appreciationRates[appreciationRates.length - 1];
+      const inflationRate = inflationRates[year - 1] ?? inflationRates[inflationRates.length - 1];
   
-      // Apply the step-up rate to monthly contribution at the beginning of each year (if year > 1)
+      // Step-up annual contribution each year after Year 1
       if (year > 1) {
-        monthlyContribution *= annualStepUpMultiplier;
+        annualContribution *= (1 + stepUpRate / 100);
       }
   
-      // Monthly compounding for mutual fund and accumulating total yearly contribution
-      for (let month = 1; month <= 12; month++) {
-        mutualFundValue = (mutualFundValue * (1 + monthlyCAGR)) + monthlyContribution;
-        totalYearlyContribution += monthlyContribution;
-      }
+      // Update real estate and mutual fund values with appreciation and contributions
+      realEstateValue = (realEstateValue * (1 + appreciationRate / 100)) + annualContribution;
+      mutualFundValue = (mutualFundValue * (1 + cagr / 100)) + annualContribution;
   
-      // Add this year's total contributions to the cumulative invested amount
-      totalInvestedAmount += totalYearlyContribution;
-  
-      // End-of-year update for real estate: add total contributions and apply annual appreciation
-      realEstateValue = (realEstateValue + totalYearlyContribution) * (1 + appreciationRate / 100);
-  
-      // Adjust the annual withdrawal for inflation
       const inflationAdjustedAnnualWithdrawal = withdrawal * Math.pow(1 + inflationRate / 100, year);
       const mutualFundValueAfterWithdrawal = Math.max(0, mutualFundValue - inflationAdjustedAnnualWithdrawal);
       const inflationAdjustedMutualFundValueAfterWithdrawal = mutualFundValueAfterWithdrawal / Math.pow(1 + inflationRate / 100, year);
   
+      // Push the current year's values as previous year's results
       data.push({
-        year,
-        principal: totalInvestedAmount, // Updated principal to reflect cumulative investment
+        year: year - 1,
+        principal,
         realEstateValueWithAppreciation: realEstateValue,
         mutualFundValueAfterCAGR: mutualFundValue,
         inflationAdjustedAnnualWithdrawal,
@@ -66,8 +55,7 @@ export default function Home() {
         inflationAdjustedMutualFundValueAfterWithdrawal,
       });
   
-      // Update mutual fund value for the next year’s starting value
-      mutualFundValue = mutualFundValueAfterWithdrawal;
+      mutualFundValue = mutualFundValueAfterWithdrawal;  // Update for next year's calculation
     }
   
     setResults(data);
