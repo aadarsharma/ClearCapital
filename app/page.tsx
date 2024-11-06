@@ -24,22 +24,12 @@ export default function Home() {
     const data = [];
     let realEstateValue = principal;
     let mutualFundValue = principal;
+    let totalInvestedAmount = principal; // Track cumulative invested amount
     let annualStepUpMultiplier = 1 + stepUpRate / 100; // Factor to adjust monthly contribution annually
     let monthlyCAGR = Math.pow(1 + cagr / 100, 1 / 12) - 1; // Convert CAGR to monthly rate for compounding
   
-    // Year 0 initial values
-    data.push({
-      year: 0,
-      principal,
-      realEstateValueWithAppreciation: principal,
-      mutualFundValueAfterCAGR: principal,
-      inflationAdjustedAnnualWithdrawal: 0,
-      mutualFundValueAfterWithdrawal: principal,
-      inflationAdjustedMutualFundValueAfterWithdrawal: principal,
-    });
-  
-    // Loop over each year to calculate projections
-    for (let year = 1; year <= years; year++) {
+    // Loop over each year to calculate projections, extending one year past the specified years
+    for (let year = 1; year <= years + 1; year++) {
       const appreciationRate = appreciationRates[year - 1] ?? 0; // Default to 0% if appreciation rate not provided
       const inflationRate = inflationRates[year - 1] ?? 0; // Default to 0% if inflation rate not provided
       let totalYearlyContribution = 0;
@@ -55,6 +45,9 @@ export default function Home() {
         totalYearlyContribution += monthlyContribution;
       }
   
+      // Add this year's total contributions to the cumulative invested amount
+      totalInvestedAmount += totalYearlyContribution;
+  
       // End-of-year update for real estate: add total contributions and apply annual appreciation
       realEstateValue = (realEstateValue + totalYearlyContribution) * (1 + appreciationRate / 100);
   
@@ -65,7 +58,7 @@ export default function Home() {
   
       data.push({
         year,
-        principal,
+        principal: totalInvestedAmount, // Updated principal to reflect cumulative investment
         realEstateValueWithAppreciation: realEstateValue,
         mutualFundValueAfterCAGR: mutualFundValue,
         inflationAdjustedAnnualWithdrawal,
@@ -78,9 +71,7 @@ export default function Home() {
     }
   
     setResults(data);
-  };
-  
-  
+  };  
 
   return (
     <div className="p-6 min-h-screen">
